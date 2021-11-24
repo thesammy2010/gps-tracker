@@ -51,14 +51,14 @@ def request() -> flask.Response:
     message, access, code = is_user_authenticated(flask.request.headers)
     if not access:
         # unauthorised
-        return flask.make_response(message, code)
+        return flask.make_response({"error": message}, code)
 
     match flask.request.method:
         case "GET":
             data = get_latest_location_info(device_id=flask.request.args.get("device_id", ""))
             return flask.make_response(flask.jsonify(dict(data)), 200)
         case "POST" | "PUT":
-            error, is_valid, data = validate_request(params=flask.request.args, data=flask.request.form)
+            error, is_valid, data = validate_request(params=flask.request.args, data=flask.request.json or flask.request.form)
             if not is_valid:
                 return flask.make_response({"error": error}, 400)
 

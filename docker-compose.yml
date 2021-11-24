@@ -1,30 +1,48 @@
+version: "3"
+
+networks:
+  mongo_network:
+
 services:
-  mongodb:
-    image : mongo:4.4.6-bionic
-    container_name: mongo
+  mongo:
+    image: "mongo:4.4.6-bionic"
+    container_name: "mongo"
+    hostname: "mongo"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - MONGO_INITDB_DATABASE=admin
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
+      PUID: "1000"
+      PGID: "1000"
+      MONGO_INITDB_DATABASE: "admin"
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "root"
     ports:
-      - 27017:27017
-    command: mongod --auth
-    restart: unless-stopped
+      - "27017:27017"
+    command: "mongod --auth"
+    restart: "unless-stopped"
     volumes:
       - "./.mongodb/db:/db/data"
       - "./.mongodb/home:/home/mongodb/"
       - "./scripts/setup.js:/docker-entrypoint-initdb.d/setup.js:ro"
+    networks:
+      mongo_network:
 
-#  webserver:
-#    build: .
-#    environment:
-#
-#    depends_on:
-#      - mongodb
-#    ports:
-#      - 8080:8080
-#      - 443:443
-#    volumes:
-#      - ../gps_logger:/home/gps_logger
+  webserver:
+    build: .
+    container_name: "gps-tracker"
+    environment:
+      PORT: "5000"
+      DISCORD_WEBHOOK: $$DISCORD_WEBHOOK_DEV
+      MONGO_URL: "mongodb://user:passw@mongo:27017/api"
+      MONGO_DATA_COLLECTION: "data"
+      MONGO_DATA_DATABASE: "api"
+      MONGO_AUTH_COLLECTION: "auths"
+      MONGO_AUTH_DATABASE: "api"
+      FLASK_ENV: "DEBUG"
+    depends_on:
+      - "mongo"
+    ports:
+      - "5000:5000"
+      - "8080:8080"
+    volumes:
+      - "./gps_tracker:/home/gps_tracker"
+    networks:
+      mongo_network:

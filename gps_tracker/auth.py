@@ -56,7 +56,7 @@ def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
             return "Not Authorised", False, 401
     except pymongo.errors.PyMongoError as e:
         print(e)
-        return "Internal Error", False, 500
+        return "Internal Error while fetching credentials " + str(e), False, 500
 
     calc_key, stored_key = hash_password(password, salt=data.get("salt", "")), data.get("key", "")
 

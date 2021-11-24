@@ -1,10 +1,13 @@
 SHELL = /bin/bash
 
 start-mongo:
-		docker-compose up --build --force-recreate --renew-anon-volumes -d
+		docker-compose up --build --force-recreate --renew-anon-volumes -d mongo
 
-run-docker: start-mongo
+run-docker:
+		docker-compose up -d
+
+run-no-docker: start-mongo
 		python gps_tracker/main.py
 
-run-no-docker:
-		python gps_tracker/main.py
+stop-docker:
+		docker compose down
