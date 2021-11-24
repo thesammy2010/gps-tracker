@@ -1,0 +1,43 @@
+[build-system]
+requires = ["poetry>=1.1.11", "setuptools"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "gps-tracker"
+version = "1.0.0"
+description = "API to interact with GPS Logger requests"
+authors = ["TheSammy2010"]
+readme = "README.md"
+homepage = "https://github.com/TheSammy2010/gps-tracker"
+repository = "https://github.com/TheSammy2010/gps-tracker"
+documentation = "https://github.com/TheSammy2010/gps-tracker/README.md"
+
+
+# Requirements
+[tool.poetry.dependencies]
+python = ">=3.10, <4"
+setuptools = "59.2.0"
+flask = "2.0.2"
+flask_restful = "0.3.9"
+waitress = "2.0.0"
+requests = "2.26.0"
+pymongo = "3.12.1"
+pytest = "6.2.5"
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py310
+"""
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+
+[tool.black]
+line-length = 120
+target_version = ["py310"]
+include = "./*.py"
+exclude = "./venv"

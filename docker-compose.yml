@@ -1,0 +1,24 @@
+services:
+  mongodb:
+    image : mongo:4.4.6-bionic
+    container_name: mongodb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=1234
+    ports:
+      - 27017:27017
+    command: mongod --auth
+    restart: unless-stopped
+  webserver:
+    build: .
+    environment:
+
+    depends_on:
+      - mongodb
+    ports:
+      - 8080:8080
+      - 443:443
+    volumes:
+      - ../gps_logger:/home/gps_logger
