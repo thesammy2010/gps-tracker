@@ -12,7 +12,7 @@ from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticate
 class TestAuth(object):
     user_data = {
         "username": "username",
-        "salt": "salt".encode("utf-8"),
+        "salt": "salt".encode("utf-8").hex(),
         "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8"
     }
 
@@ -52,16 +52,16 @@ class TestAuth(object):
         "input_values,expected_value",
         [
             (
-                    ("password123", "salt".encode("utf-8")),
+                    ("password123", "73616c74"),
                     "4d648905df3786f5cb2c6d614fa01f4060da0d5a0cf3eecc11597ff084071ddb"
             ),
             (
-                    ("a different password", "salt".encode("utf-8")),
+                    ("a different password", "73616c74"),
                     "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8"
             )
         ]
     )
-    def test_hash_password(self, expected_value: str, input_values: Tuple[str, bytes]) -> None:
+    def test_hash_password(self, expected_value: str, input_values: Tuple[str, str]) -> None:
         assert expected_value == hash_password(input_values[0], input_values[1])
 
     @pytest.mark.parametrize(

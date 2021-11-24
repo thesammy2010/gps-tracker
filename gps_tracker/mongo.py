@@ -1,8 +1,8 @@
 import typing
 import datetime
 
+import bson
 import pymongo
-from bson import ObjectId
 
 from gps_tracker.settings import Config
 
@@ -15,14 +15,17 @@ MONGO_DATA_CURSOR = mongo_client[Config.mongo_data_database][Config.mongo_data_c
 def look_up_user(username: str) -> typing.Dict[typing.Any, typing.Any]:
     data = MONGO_AUTH_CURSOR.find_one(filter={"username": username})
     # returns {user, key, salt}
+    if data is None:
+        return {}
     return dict(data)
 
 
-def post_location_info(record: typing.Dict[str, typing.Any]) -> (bool, str):
-    record["_id"] = ObjectId()
+def post_location_info(data: typing.Dict[str, typing.Any]) -> (str, bool):
+    record = dict(data)
+    record["_id"] = bson.ObjectId()
     record["collectedAt"] = datetime.datetime.now(tz=datetime.timezone.utc)
     result = MONGO_DATA_CURSOR.insert_one(document=record)
-    return bool(result), str(record["_id"])
+    return str(record["_id"]), bool(result)
 
 
 def get_latest_location_info(device_id: str) -> typing.Dict[typing.Any, typing.Any]:
@@ -32,4 +35,5 @@ def get_latest_location_info(device_id: str) -> typing.Dict[typing.Any, typing.A
         query_filter["device"] = device_id
     cur: pymongo.cursor.Cursor = MONGO_DATA_CURSOR.find(filter=query_filter).sort("_id", -1).limit(1)
     record = list(cur)[0]
+    record["_id"] = str(record.get("_id", ""))
     return dict(record)

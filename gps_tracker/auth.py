@@ -23,11 +23,11 @@ def decrypt_header(content: str) -> (str, str):
 
 
 # returns key
-def hash_password(password: str, salt: bytes) -> str:
+def hash_password(password: str, salt: str) -> str:
     return hashlib.pbkdf2_hmac(
         hash_name="sha256",
         password=password.encode("utf-8"),
-        salt=salt,
+        salt=bytes.fromhex(salt),
         iterations=123456
     ).hex()
 
@@ -51,7 +51,8 @@ def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
         data = look_up_user(username=username)
         if not data.get("username", "") == username:
             return "Not Authorised", False, 401
-    except pymongo.errors.PyMongoError:
+    except pymongo.errors.PyMongoError as e:
+        print(e)
         return "Internal Error", False, 500
 
     if hash_password(password, salt=data.get("salt", "")) == data.get("key", ""):
