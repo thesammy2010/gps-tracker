@@ -1,9 +1,9 @@
 SHELL = /bin/bash
 
-run-mongo:
+start-mongo:
 		docker-compose up --build --force-recreate --renew-anon-volumes -d
 
-run-local: run-mongo
+run-docker: start-mongo
 		python gps_tracker/main.py
 
 run-no-docker:

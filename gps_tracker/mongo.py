@@ -14,7 +14,7 @@ MONGO_DATA_CURSOR = mongo_client[Config.mongo_data_database][Config.mongo_data_c
 
 def look_up_user(username: str) -> typing.Dict[typing.Any, typing.Any]:
     data = MONGO_AUTH_CURSOR.find_one(filter={"username": username})
-    # returns {user, key, salt}
+    # returns {user, key, salt, authorised}
     if data is None:
         return {}
     return dict(data)

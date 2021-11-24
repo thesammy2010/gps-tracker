@@ -11,9 +11,18 @@ from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticate
 
 class TestAuth(object):
     user_data = {
-        "username": "username",
-        "salt": "salt".encode("utf-8").hex(),
-        "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8"
+        "user1": {
+            "username": "username",
+            "salt": "salt".encode("utf-8").hex(),
+            "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
+            "authorised": True
+        },
+        "user2": {
+            "username": "username",
+            "salt": "salt".encode("utf-8").hex(),
+            "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
+            "authorised": False
+        }
     }
 
     @pytest.mark.parametrize(
@@ -65,31 +74,35 @@ class TestAuth(object):
         assert expected_value == hash_password(input_values[0], input_values[1])
 
     @pytest.mark.parametrize(
-        "input_data,expected_message,expected_access,expected_code",
+        "input_data,user,expected_message,expected_access,expected_code",
         [
             (
                 {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "", True, 200  # happy path
+                "user1", "", True, 200  # happy path
             ),
             (
                 {"Authorisation": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "Authorization header missing", False, 400  # misspelled header
+                "user1", "Authorization header missing", False, 400  # misspelled header
             ),
             (
                 {"Authorization": "dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "Use basic authorisation method", False, 400  # Basic missing from header content
+                "user1", "Use basic authorisation method", False, 400  # Basic missing from header content
             ),
             (
                 {"Authorization": "Basic"},
-                "Malformed credentials", False, 400  # credentials malformed
+                "user1", "Malformed credentials", False, 400  # credentials malformed
             ),
             (
                 {"Authorization": "Basic dXNlcm5hbWUxOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
-                "Not Authorised", False, 401  # invalid username so user would not show up in database
+                "user1", "Not Authorised", False, 401  # invalid username so user would not show up in database
             ),
             (
                 {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQh"},
-                "Access Denied", False, 403  # invalid password
+                "user1", "Not Authorised", False, 401  # invalid password
+            ),
+            (
+                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                "user2", "Access Denied", False, 403  # identity known but not authorised
             ),
         ]
     )
@@ -100,9 +113,10 @@ class TestAuth(object):
             expected_message: str,
             expected_access: bool,
             expected_code: int,
-            input_data: typing.Dict[str, str]
+            input_data: typing.Dict[str, str],
+            user: str,
     ):
-        mocked_look_up_user.return_value = self.user_data
+        mocked_look_up_user.return_value = self.user_data[user]
         message, access, code = is_user_authenticated(headers=input_data)
 
         assert expected_message == message

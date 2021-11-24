@@ -11,9 +11,12 @@ def decrypt_header(content: str) -> (str, str):
     if not content:
         return None, None
 
-    content_bytes: bytes = content.encode(encoding="ascii")
-    message_bytes: bytes = base64.b64decode(s=content_bytes)
-    message: str = message_bytes.decode(encoding="ascii")
+    try:
+        content_bytes: bytes = content.encode(encoding="ascii")
+        message_bytes: bytes = base64.b64decode(s=content_bytes)
+        message: str = message_bytes.decode(encoding="ascii")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return None, None
 
     if message.count(":") == 1:
         username, password = message.split(":")
@@ -55,10 +58,14 @@ def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
         print(e)
         return "Internal Error", False, 500
 
-    if hash_password(password, salt=data.get("salt", "")) == data.get("key", ""):
-        return "", True, 200
-    else:
-        print("")
-        for key, value in locals().items():
-            print(key, value)
-        return "Access Denied", False, 403
+    calc_key, stored_key = hash_password(password, salt=data.get("salt", "")), data.get("key", "")
+
+    match (calc_key == stored_key, data.get("authorised", False)):
+        case (True, True):
+            return "", True, 200
+        case (True, False):
+            return "Access Denied", False, 403
+        case (False, True) | (False, False):
+            return "Not Authorised", False, 401
+        case _:
+            raise ValueError("Invalid path")

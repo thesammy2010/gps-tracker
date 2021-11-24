@@ -5,7 +5,7 @@ import typing
 class Config:
     _config: typing.Any = None
     port: str = ""
-    discord_webhook: str = ""
+    discord_webhook: str = "https://discordapp.com/api/webhooks/"
     mongo_url: str = "mongodb://user:passw@localhost:27017/api"
     mongo_data_collection: str = "data"
     mongo_data_database: str = "api"

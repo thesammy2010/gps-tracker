@@ -26,7 +26,8 @@ db.auths.insert(
     {
         username: "username",
         salt: "73616c74",
-        key: "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8" // password123
+        key: "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8", // password123
+        authorised: true
     }
 )
 db.data.insert(
