@@ -16,7 +16,7 @@ API.add_resource(Health, "/health")
 @APP.route("/location", methods=['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'])
 def location():
     resp = request()
-    # print(resp.data) for any debugging
+    # print(resp.data)  # for any debugging
     return resp
 
 
