@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticated
+from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticated  # isort: skip
 
 
 class TestAuth(object):

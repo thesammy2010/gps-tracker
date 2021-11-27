@@ -26,8 +26,7 @@ jobs:
       - name: "Test"
         run: "pytest"
       - name: "Build coverage file"
-        run: |
-          pytest -m all --cache-clear --cov=app > pytest-coverage.txt
+        run: "pytest -m all --cov=gps_tracker > pytest-coverage.txt"
       - name: "pytest-coverage-commentator"
         uses: "coroo/pytest-coverage-commentator@v1.0.2"
         with:
