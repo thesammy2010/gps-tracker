@@ -25,19 +25,14 @@ pymongo = "3.12.1"
 pytest = "6.2.5"
 
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py310
-"""
+[tool.black]
+line-length = 120
+target_version = ["py310"]
+include = ["./*.py", "\.pyi?$"]
+exclude = "./venv"
+
 
 [tool.pytest.ini_options]
 testpaths = [
     "tests"
 ]
-
-[tool.black]
-line-length = 120
-target_version = ["py310"]
-include = "./*.py"
-exclude = "./venv"

@@ -1,5 +1,9 @@
 SHELL = /bin/bash
 
+install:  ## setup for local development
+		./scripts/install.sh
+
+
 start-mongo:  ## start up the Mongo docker container
 		docker-compose up --build --force-recreate --renew-anon-volumes -d mongo
 
