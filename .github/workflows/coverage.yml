@@ -24,7 +24,15 @@ jobs:
           pip install .
           pip install -r scripts/requirements-dev.txt
       - name: "Build coverage file"
-        run: "pytest -m all --cov=gps_tracker > pytest-coverage.txt"
+        run: |
+          coverage run -m pytest -m all
+          coverage html
+          coverage report > pytest-coverage.txt"
+      - name: "Upload code coverage report"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: "code-coverage-report"
+          path: "htmlcov/index.html"
       - name: "pytest-coverage-commentator"
         uses: "coroo/pytest-coverage-commentator@v1.0.2"
         with:
