@@ -23,7 +23,7 @@ class TestSettings:
         [
             ("port", "1234"),  # mocking setting from env variable
             ("flask_env", "DEBUG"),  # this is a default variable
-        ]
+        ],
     )
     @mock.patch.dict(os.environ, {"PORT": "1234"})
     def test_config(self, field_name, expected_output) -> None:

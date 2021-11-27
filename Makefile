@@ -7,11 +7,14 @@ lint:  ## used to lint files
 		black .
 		isort .
 
+test-unit:  ## only run unit tests
+		pytest
+
 test-integration: start-mongo  ## run integration tests
 		pytest -m integration
 
-test: test-integration ## run all python tests
-		coverage run -m pytest
+test:  ## run all python tests
+		coverage run -m pytest -m all
 		coverage report
 
 start-mongo:  ## start up the Mongo docker container

@@ -1,5 +1,6 @@
-import pytest
 import sys
+
+import pytest
 
 
 # to not automatically run integration tests unless specified

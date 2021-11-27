@@ -111,19 +111,20 @@ class TestAuth(object):
     @pytest.mark.parametrize(
         "input_data,expected_message,expected_access,expected_code",
         [
+            ({"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="}, "", True, 200),
             (
-                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                    "", True, 200
-            ),
-            (
-                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQx"},
-                    "Not Authorised", False, 401
+                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQx"},
+                "Not Authorised",
+                False,
+                401,
             ),  # username:a different password1
             (
-                    {"Authorization": "Basic dXNlcm5hbWUyOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
-                    "Access Denied", False, 403
-            )  # username2:a different password
-        ]
+                {"Authorization": "Basic dXNlcm5hbWUyOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
+                "Access Denied",
+                False,
+                403,
+            ),  # username2:a different password
+        ],
     )
     def test_is_user_authenticated_integration(
         self,
