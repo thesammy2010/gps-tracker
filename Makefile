@@ -1,13 +1,10 @@
 SHELL = /bin/bash
 
-start-mongo:
+start-mongo:  ## start up the Mongo docker container
 		docker-compose up --build --force-recreate --renew-anon-volumes -d mongo
 
-run-docker:
-		docker-compose up -d
+run: start-mongo  ## run api
+		./scripts/run.sh
 
-run-no-docker: start-mongo
-		python gps_tracker/main.py
-
-stop-docker:
+stop-docker: ## tear down mongo
 		docker compose down

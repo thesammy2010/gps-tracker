@@ -63,7 +63,7 @@ def request() -> flask.Response:
                 return flask.make_response({"error": error}, 400)
 
             req_id, mongo_post_success = post_location_info(data)
-            if flask.request.args.get("discord") is False:
+            if not flask.request.args.get("discord") is True:
                 if mongo_post_success:
                     return flask.make_response({"request_id": req_id}, 200)
                 else:

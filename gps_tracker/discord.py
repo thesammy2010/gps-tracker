@@ -1,16 +1,14 @@
-# send data to discord
-
 import requests
 import typing
 import copy
 
-from gps_tracker.settings import Config
+from gps_tracker.settings import CONFIG
 from gps_tracker.discord_embed import base
 
 func_map: typing.Dict[str, typing.Callable] = {
     "_id": lambda x: x,
     "accuracy": lambda x: "{0:.2f} m".format(x),
-    "activity": lambda x: x, # idk
+    "activity": lambda x: x,  # idk
     "altitude": lambda x: "{0:.1f} m".format(x),
     "battery": lambda x: "{0}".format(int(x)),
     "collectedAt": lambda x: x if isinstance(x, str) else str(x),
@@ -55,7 +53,7 @@ def generate_content(data: typing.Dict) -> typing.List[typing.Dict[str, str]]:
 
 
 def format_url(latitude: float, longitude: float) -> str:
-    return f"https://maps.google.com/?q={latitude},{longitude}"
+    return f"https://google.com/maps?q={latitude},{longitude}"
 
 
 def post_to_discord(location_data: typing.Dict) -> bool:
@@ -67,8 +65,6 @@ def post_to_discord(location_data: typing.Dict) -> bool:
         "fields": generate_content(data=location_data)
     })
     r: requests.models.Response = requests.request(
-        method="POST", url=Config.discord_webhook, json=data, headers={"Content-Type": "application/json"}
+        method="POST", url=CONFIG.discord_webhook, json=data, headers={"Content-Type": "application/json"}
     )
-    print(r.request.body)
-    print(r.request.url)
     return r.ok

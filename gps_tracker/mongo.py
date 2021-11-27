@@ -4,12 +4,12 @@ import datetime
 import bson
 import pymongo
 
-from gps_tracker.settings import Config
+from gps_tracker.settings import CONFIG
 
 
-mongo_client: pymongo.MongoClient = pymongo.MongoClient(Config.mongo_url)
-MONGO_AUTH_CURSOR = mongo_client[Config.mongo_auth_database][Config.mongo_auth_collection]
-MONGO_DATA_CURSOR = mongo_client[Config.mongo_data_database][Config.mongo_data_collection]
+mongo_client: pymongo.MongoClient = pymongo.MongoClient(CONFIG.mongo_url)
+MONGO_AUTH_CURSOR = mongo_client[CONFIG.mongo_auth_database][CONFIG.mongo_auth_collection]
+MONGO_DATA_CURSOR = mongo_client[CONFIG.mongo_data_database][CONFIG.mongo_data_collection]
 
 
 def look_up_user(username: str) -> typing.Dict[typing.Any, typing.Any]:

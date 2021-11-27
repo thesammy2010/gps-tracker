@@ -1,38 +1,18 @@
 import os
-import typing
 
 
 class Config:
-    _config: typing.Any = None
-    port: str = ""
-    discord_webhook: str = "https://discordapp.com/api/webhooks/"
-    mongo_url: str = "mongodb://user:passw@localhost:27017/api"
-    mongo_data_collection: str = "data"
-    mongo_data_database: str = "api"
-    mongo_auth_collection: str = "auths"
-    mongo_auth_database: str = "api"
-    flask_env: str = ""
-    _options: typing.List[str] = [
-        "port",
-        "discord_webhook",
-        "mongo_url",
-        "mongo_data_collection",
-        "mongo_data_database",
-        "mongo_auth_collection",
-        "mongo_auth_database",
-        "flask_env"
-    ]
+    def __init__(self) -> None:
+        self.port: str = os.getenv("PORT", "5000")
+        self.flask_env: str = os.getenv("FLASK_ENV", "DEBUG")
+        self.discord_webhook: str = os.getenv("DISCORD_WEBHOOK", "https://discordapp.com/api/webhooks/")
 
-    def __new__(cls) -> typing.Any:  # needs to be typed as a class instance
-        if cls._config is not None:
-            return cls._config
-        cls._config = super().__new__(cls)
-        cls._config._load_from_environment_variables()
-        return cls._config
-
-    def _load_from_environment_variables(self) -> None:
-        for option in self._options:
-            self.__setattr__(option, os.getenv(option.upper(), self.__getattribute__(option)))
+        # mongo
+        self.mongo_url: str = os.getenv("MONGO_URL", "mongodb://user:passw@localhost:27017/api")
+        self.mongo_auth_database: str = os.getenv("MONGO_AUTH_DATABASE", "api")
+        self.mongo_auth_collection: str = os.getenv("MONGO_AUTH_COLLECTION", "auths")
+        self.mongo_data_database: str = os.getenv("MONGO_DATA_DATABASE", "api")
+        self.mongo_data_collection: str = os.getenv("MONGO_DATA_COLLECTION", "data")
 
 
 CONFIG = Config()
