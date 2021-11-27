@@ -30,16 +30,14 @@ jobs:
           password: "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
       - name: "Start containers"
         run: "docker-compose -f 'docker-compose.yml' up -d --build"
-      - name: "Test"
-        run: "pytest --verbose -m all"
-      - name: "Stop containers"
-        if: "always()"
-        run: "docker-compose -f 'docker-compose.yml' down"
       - name: "Build coverage file"
         run: |
           coverage run -m pytest -m all
           coverage html
-          coverage report > pytest-coverage.txt"
+          coverage report > pytest-coverage.txt
+      - name: "Stop containers"
+        if: "always()"
+        run: "docker-compose -f 'docker-compose.yml' down"
       - name: "Upload code coverage report"
         uses: "actions/upload-artifact@v2"
         with:
