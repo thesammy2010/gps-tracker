@@ -10,7 +10,7 @@ lint:  ## used to lint files
 test-integration: start-mongo  ## run integration tests
 		pytest -m integration
 
-test: ## run all python tests
+test: test-integration ## run all python tests
 		coverage run -m pytest
 		coverage report
 

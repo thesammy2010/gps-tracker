@@ -30,6 +30,14 @@ db.auths.insert(
         authorised: true
     }
 )
+db.auths.insert(
+    {
+        username: "username2",
+        salt: "73616c74",
+        key: "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8", // password123
+        authorised: false
+    }
+)
 db.data.insert(
     {
         _id: new ObjectId("615b4e4b1ad5da6788c3ea6d"),

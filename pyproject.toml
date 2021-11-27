@@ -30,6 +30,7 @@ verbose = true
 target-version = ["py310"]
 exclude = "venv"
 
+
 # mypy doesn't yet work on python 3.10
 [tool.mypy]
 python_version = "3.10"
@@ -37,11 +38,14 @@ warn_return_any = true
 warn_unused_configs = true
 
 
+[tool.coverage.run]
+source = ["gps_tracker"]
 
 
 [tool.pytest.ini_options]
 markers = [
     "integration",
-    "unit"
+    "unit",
+    "all"
 ]
 testpaths = ["tests"]
