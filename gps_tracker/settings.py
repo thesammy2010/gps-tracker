@@ -15,4 +15,4 @@ class Config:
         self.mongo_data_collection: str = os.getenv("MONGO_DATA_COLLECTION", "data")
 
 
-CONFIG = Config()
+CONFIG: Config = Config()

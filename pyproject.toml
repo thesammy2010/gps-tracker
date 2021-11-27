@@ -22,17 +22,26 @@ flask_restful = "0.3.9"
 waitress = "2.0.0"
 requests = "2.26.0"
 pymongo = "3.12.1"
-pytest = "6.2.5"
 
 
 [tool.black]
 line-length = 120
-target_version = ["py310"]
-include = ["./*.py", "\.pyi?$"]
-exclude = "./venv"
+verbose = true
+target-version = ["py310"]
+exclude = "venv"
+
+# mypy doesn't yet work on python 3.10
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+
+
 
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests"
+markers = [
+    "integration",
+    "unit"
 ]
+testpaths = ["tests"]

@@ -1,11 +1,10 @@
-import typing
 import datetime
+import typing
 
 import bson
 import pymongo
 
 from gps_tracker.settings import CONFIG
-
 
 mongo_client: pymongo.MongoClient = pymongo.MongoClient(CONFIG.mongo_url)
 MONGO_AUTH_CURSOR = mongo_client[CONFIG.mongo_auth_database][CONFIG.mongo_auth_collection]

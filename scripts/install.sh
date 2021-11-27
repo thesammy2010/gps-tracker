@@ -39,9 +39,3 @@ fi
 
 # install project in editable mode
 pip install -e .
-
-# install dev dependencies
-pip install \
-  black==21.11b1 \
-  mypy==0.910
-

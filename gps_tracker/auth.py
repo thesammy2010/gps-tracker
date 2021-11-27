@@ -1,6 +1,6 @@
 import base64
-import typing
 import hashlib
+import typing
 
 import pymongo.errors
 
@@ -28,17 +28,14 @@ def decrypt_header(content: str) -> (str, str):
 # returns key
 def hash_password(password: str, salt: str) -> str:
     return hashlib.pbkdf2_hmac(
-        hash_name="sha256",
-        password=password.encode("utf-8"),
-        salt=bytes.fromhex(salt),
-        iterations=123456
+        hash_name="sha256", password=password.encode("utf-8"), salt=bytes.fromhex(salt), iterations=123456
     ).hex()
 
 
 def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
 
     # check if header is supplied
-    header = headers.get("Authorization", "")
+    header: str = headers.get("Authorization", "")
     if not header:
         return "Authorization header missing", False, 400
 

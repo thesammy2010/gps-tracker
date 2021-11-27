@@ -18,7 +18,7 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
         "direction",
         "altitude",
         "provider",
-        "activity"
+        "activity",
     ]
     numeric_fields: typing.List[str] = [
         "latitude",
@@ -39,9 +39,9 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
         except (ValueError, TypeError):
             return (
                 f"field <{field}> of value <{data.get('value')}> of type <{type(data.get('value')).__name__}>"
-                " must be numeric"
-                , False
-                , {}
+                " must be numeric",
+                False,
+                {},
             )
 
     return "", True, {i: (float(j) if i in numeric_fields else j) for i, j in data.items() if i in allowed_fields}
@@ -58,7 +58,9 @@ def request() -> flask.Response:
             data = get_latest_location_info(device_id=flask.request.args.get("device_id", ""))
             return flask.make_response(flask.jsonify(dict(data)), 200)
         case "POST" | "PUT":
-            error, is_valid, data = validate_request(params=flask.request.args, data=flask.request.json or flask.request.form)
+            error, is_valid, data = validate_request(
+                params=flask.request.args, data=flask.request.json or flask.request.form
+            )
             if not is_valid:
                 return flask.make_response({"error": error}, 400)
 
@@ -88,5 +90,5 @@ def request() -> flask.Response:
         case _:
             return flask.make_response(
                 f'{"error": "HTTP Verb %s is not supported, please use one of [GET, POST, PUT]}' % flask.request.method,
-                403
+                403,
             )
