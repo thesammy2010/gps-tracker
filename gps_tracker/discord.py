@@ -8,17 +8,17 @@ from gps_tracker.settings import CONFIG
 
 func_map: typing.Dict[str, typing.Callable] = {
     "_id": lambda x: x,
-    "accuracy": lambda x: "{0:.2f} m".format(x),
+    "accuracy": lambda x: "{0:.2f} m".format(float(x)),
     "activity": lambda x: x,  # idk
-    "altitude": lambda x: "{0:.1f} m".format(x),
-    "battery": lambda x: "{0}".format(int(x)),
+    "altitude": lambda x: "{0:.1f} m".format(float(x)),
+    "battery": lambda x: "{0} %".format(int(x)),
     "collectedAt": lambda x: x if isinstance(x, str) else str(x),
     "device": lambda x: x,
-    "latitude": lambda x: "{0:.5f} °".format(x),
-    "longitude": lambda x: "{0:.5f} °".format(x),
+    "latitude": lambda x: "{0:.5f} °".format(float(x)),
+    "longitude": lambda x: "{0:.5f} °".format(float(x)),
     "provider": lambda x: x,
-    "speed": lambda x: "{0:.2f} m/s".format(x),
-    "direction": lambda x: "{0:.1f} °".format(x),
+    "speed": lambda x: "{0:.2f} m/s".format(float(x)),
+    "direction": lambda x: "{0:.1f} °".format(float(x)),
 }
 
 
