@@ -6,8 +6,7 @@ from unittest import mock
 import pytest
 import requests
 
-from gps_tracker.discord import (format_url, func_map, generate_content,
-                                 post_to_discord)
+from gps_tracker.discord import format_url, func_map, generate_content, post_to_discord  # isort: skip
 
 
 class TestGenerateContent:

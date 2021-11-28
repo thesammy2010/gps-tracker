@@ -4,8 +4,7 @@ from unittest import mock
 
 import pytest
 
-from gps_tracker.mongo import (MONGO_DATA_CURSOR, look_up_user,
-                               post_location_info)
+from gps_tracker.mongo import MONGO_DATA_CURSOR, look_up_user, post_location_info  # isort: skip
 
 
 class TestMongo:
