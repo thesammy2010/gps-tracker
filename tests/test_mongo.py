@@ -4,7 +4,8 @@ from unittest import mock
 
 import pytest
 
-from gps_tracker.mongo import MONGO_DATA_CURSOR, look_up_user, post_location_info  # isort: skip
+from gps_tracker.mongo import MONGO_DATA_CURSOR, look_up_user, post_location_info, ping, \
+    get_latest_location_info  # isort: skip
 
 
 class TestMongo:
@@ -53,3 +54,70 @@ class TestMongo:
         del mongo_data["_id"]
 
         assert data == mongo_data
+
+    @pytest.mark.integration
+    def test_ping(self) -> None:
+        assert ping()
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "device_id,expected_value",
+        [
+            (
+                "",
+                {
+                    "latitude": "0",
+                    "longitude": "1",
+                    "device": "Android",
+                    "accuracy": "3",
+                    "battery": "4",
+                    "speed": "5",
+                    "direction": "6",
+                    "altitude": "7",
+                    "provider": "data",
+                    "activity": "n/a",
+                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0)
+                },
+            ),
+            (
+                "unknown device", {}
+            ),
+            (
+                "Android",
+                {
+                    "latitude": "0",
+                    "longitude": "1",
+                    "device": "Android",
+                    "accuracy": "3",
+                    "battery": "4",
+                    "speed": "5",
+                    "direction": "6",
+                    "altitude": "7",
+                    "provider": "data",
+                    "activity": "n/a",
+                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0)
+                },
+            ),
+            (
+                "iPhone",
+                {
+                    "latitude": "45",
+                    "longitude": "30",
+                    "device": "iPhone",
+                    "accuracy": "20",
+                    "battery": "95",
+                    "speed": "2",
+                    "direction": "12",
+                    "altitude": "50",
+                    "provider": "data",
+                    "activity": "n/a",
+                    "collectedAt": datetime.datetime(2021, 11, 4, 0, 0, 0)
+                }
+            )
+        ]
+    )
+    def test_get_latest_location_info(self, device_id: str, expected_value: typing.Dict) -> None:
+        data = get_latest_location_info(device_id=device_id)
+        if data.get("_id", None):
+            del data["_id"]
+        assert expected_value == data

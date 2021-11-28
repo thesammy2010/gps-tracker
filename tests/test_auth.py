@@ -2,6 +2,7 @@ import typing
 from typing import Tuple
 from unittest import mock
 
+import pymongo.errors
 import pytest
 
 from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticated  # isort: skip
@@ -21,6 +22,12 @@ class TestAuth(object):
             "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
             "authorised": False,
         },
+        "user3": {
+            "username": "username",
+            "salt": "salt".encode("utf-8").hex(),
+            "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
+            "authorised": "non boolean field",
+        },
     }
 
     @pytest.mark.parametrize(
@@ -32,6 +39,7 @@ class TestAuth(object):
             ("dXNlcm5hbWU6", ("username", "")),  # username:
             ("", (None, None)),
             ("Ojo=", (None, None)),  # "::"
+            ("not/Base64", (None, None))
         ],
     )
     def test_decrypt_header(self, expected_value: Tuple[str, str], input_value: str) -> None:
@@ -52,52 +60,59 @@ class TestAuth(object):
         [
             ({"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="}, "user1", "", True, 200),  # happy path
             (
-                {"Authorisation": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "user1",
-                "Authorization header missing",
-                False,
-                400,  # misspelled header
+                    {"Authorisation": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                    "user1",
+                    "Authorization header missing",
+                    False,
+                    400,  # misspelled header
             ),
             (
-                {"Authorization": "dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "user1",
-                "Use basic authorisation method",
-                False,
-                400,  # Basic missing from header content
+                    {"Authorization": "dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                    "user1",
+                    "Use basic authorisation method",
+                    False,
+                    400,  # Basic missing from header content
             ),
             ({"Authorization": "Basic"}, "user1", "Malformed credentials", False, 400),  # credentials malformed
             (
-                {"Authorization": "Basic dXNlcm5hbWUxOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
-                "user1",
-                "Not Authorised",
-                False,
-                401,  # invalid username so user would not show up in database
+                    {"Authorization": "Basic dXNlcm5hbWUxOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
+                    "user1",
+                    "Not Authorised",
+                    False,
+                    401,  # invalid username so user would not show up in database
             ),
             (
-                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQh"},
-                "user1",
-                "Not Authorised",
-                False,
-                401,  # invalid password
+                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQh"},
+                    "user1",
+                    "Not Authorised",
+                    False,
+                    401,  # invalid password
             ),
             (
-                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                "user2",
-                "Access Denied",
-                False,
-                403,  # identity known but not authorised
+                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                    "user2",
+                    "Access Denied",
+                    False,
+                    403,  # identity known but not authorised
+            ),
+            (
+                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                    "user3",
+                    "Internal Error while verifying credentials",
+                    False,
+                    500,  # error on password hashing
             ),
         ],
     )
     @mock.patch("gps_tracker.auth.look_up_user")
     def test_is_user_authenticated(
-        self,
-        mocked_look_up_user: mock.MagicMock,
-        expected_message: str,
-        expected_access: bool,
-        expected_code: int,
-        input_data: typing.Dict[str, str],
-        user: str,
+            self,
+            mocked_look_up_user: mock.MagicMock,
+            expected_message: str,
+            expected_access: bool,
+            expected_code: int,
+            input_data: typing.Dict[str, str],
+            user: str,
     ):
         mocked_look_up_user.return_value = self.user_data[user]
         message, access, code = is_user_authenticated(headers=input_data)
@@ -112,28 +127,37 @@ class TestAuth(object):
         [
             ({"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="}, "", True, 200),
             (
-                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQx"},
-                "Not Authorised",
-                False,
-                401,
+                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQx"},
+                    "Not Authorised",
+                    False,
+                    401,
             ),  # username:a different password1
             (
-                {"Authorization": "Basic dXNlcm5hbWUyOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
-                "Access Denied",
-                False,
-                403,
+                    {"Authorization": "Basic dXNlcm5hbWUyOmEgZGlmZmVyZW50IHBhc3N3b3Jk"},
+                    "Access Denied",
+                    False,
+                    403,
             ),  # username2:a different password
         ],
     )
     def test_is_user_authenticated_integration(
-        self,
-        expected_message: str,
-        expected_access: bool,
-        expected_code: int,
-        input_data: typing.Dict[str, str],
+            self,
+            expected_message: str,
+            expected_access: bool,
+            expected_code: int,
+            input_data: typing.Dict[str, str],
     ):
         message, access, code = is_user_authenticated(headers=input_data)
 
         assert expected_message == message
         assert expected_access is access
         assert expected_code == code
+
+    @mock.patch("gps_tracker.auth.look_up_user")
+    def test_is_user_authenticated_error(self, mocked_lookup: mock.MagicMock) -> None:
+        mocked_lookup.side_effect = pymongo.errors.PyMongoError("mocked error")
+
+        res1, res2, res3 = is_user_authenticated({"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="})
+        assert res1 == "Internal Error while fetching credentials mocked error"
+        assert not res2
+        assert res3 == 500

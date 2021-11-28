@@ -54,4 +54,20 @@ db.data.insert(
         collectedAt: new Date(2021, 10, 4, 0, 0, 0)
     }
 )
+db.data.insert(
+    {
+        _id: new ObjectId("615b4e4b1ad5da6788c3ea6e"),
+        latitude: "0",
+        longitude: "1",
+        device: "Android",
+        accuracy: "3", // metres
+        battery: "4", // percent
+        speed: "5", // m/s
+        direction: "6", // bearing
+        altitude: "7",
+        provider: "data",
+        activity: "n/a",
+        collectedAt: new Date(2021, 10, 5, 0, 0, 0)
+    }
+)
 

@@ -6,9 +6,9 @@ import pymongo
 
 from gps_tracker.settings import CONFIG
 
-mongo_client: pymongo.MongoClient = pymongo.MongoClient(CONFIG.mongo_url)
-MONGO_AUTH_CURSOR = mongo_client[CONFIG.mongo_auth_database][CONFIG.mongo_auth_collection]
-MONGO_DATA_CURSOR = mongo_client[CONFIG.mongo_data_database][CONFIG.mongo_data_collection]
+MONGO_CLIENT: pymongo.MongoClient = pymongo.MongoClient(CONFIG.mongo_url)
+MONGO_AUTH_CURSOR = MONGO_CLIENT[CONFIG.mongo_auth_database][CONFIG.mongo_auth_collection]
+MONGO_DATA_CURSOR = MONGO_CLIENT[CONFIG.mongo_data_database][CONFIG.mongo_data_collection]
 
 
 def look_up_user(username: str) -> typing.Dict[typing.Any, typing.Any]:
@@ -33,12 +33,16 @@ def get_latest_location_info(device_id: str) -> typing.Dict[typing.Any, typing.A
     if device_id:
         query_filter["device"] = device_id
     cur: pymongo.cursor.Cursor = MONGO_DATA_CURSOR.find(filter=query_filter).sort("_id", -1).limit(1)
-    data = list(cur)
-    if any(data):
-        record: typing.Dict = data[0]
-        if not record:
-            return {}
+    for idx, data in enumerate(cur):  # once the cursor is evaluated once, you lose the value
+        record: typing.Dict = dict(data)
         record["_id"] = str(record.get("_id", ""))
-        return dict(record)
+        return record
     else:
         return {}
+
+
+def ping() -> bool:
+    return [
+        MONGO_CLIENT[CONFIG.mongo_auth_database].command("ping"),
+        MONGO_CLIENT[CONFIG.mongo_data_database].command("ping")
+    ].count({"ok": 1.0}) == 2

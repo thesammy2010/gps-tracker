@@ -1,4 +1,5 @@
 import base64
+import binascii
 import hashlib
 import typing
 
@@ -15,7 +16,7 @@ def decrypt_header(content: str) -> (str, str):
         content_bytes: bytes = content.encode(encoding="ascii")
         message_bytes: bytes = base64.b64decode(s=content_bytes)
         message: str = message_bytes.decode(encoding="ascii")
-    except (UnicodeEncodeError, UnicodeDecodeError):
+    except (UnicodeEncodeError, UnicodeDecodeError, binascii.Error):
         return None, None
 
     if message.count(":") == 1:
@@ -65,4 +66,5 @@ def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
         case (False, True) | (False, False):
             return "Not Authorised", False, 401
         case _:
-            raise ValueError("Invalid path")
+            # this shouldn't be able to happen
+            return "Internal Error while verifying credentials", False, 500
