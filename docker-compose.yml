@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  mongo:
+    image: "mongo:4.4.6-bionic"
+    container_name: "mongo"
+    hostname: "mongo"
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      MONGO_INITDB_DATABASE: "admin"
+      MONGO_INITDB_ROOT_USERNAME: "root"
+      MONGO_INITDB_ROOT_PASSWORD: "root"
+    ports:
+      - "27017:27017"
+    command: "mongod --auth"
+    restart: "unless-stopped"
+    volumes:
+      - "./.mongodb/db:/db/data"
+      - "./.mongodb/home:/home/mongodb/"
+      - "./scripts/setup.js:/docker-entrypoint-initdb.d/setup.js:ro"
