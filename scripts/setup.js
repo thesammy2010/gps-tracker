@@ -41,18 +41,16 @@ db.auths.insert(
 db.data.insert(
     {
         _id: new ObjectId("615b4e4b1ad5da6788c3ea6d"),
-        locationData: {
-            latitude: "45",
-            longitude: "30",
-            device: "iPhone",
-            accuracy: "20", // metres
-            battery: "95", // percent
-            speed: "2", // m/s
-            direction: "12", // bearing
-            altitude: "50",
-            provider: "data",
-            activity: "n/a"
-        },
+        latitude: "45",
+        longitude: "30",
+        device: "iPhone",
+        accuracy: "20", // metres
+        battery: "95", // percent
+        speed: "2", // m/s
+        direction: "12", // bearing
+        altitude: "50",
+        provider: "data",
+        activity: "n/a",
         collectedAt: new Date(2021, 10, 4, 0, 0, 0)
     }
 )

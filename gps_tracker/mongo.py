@@ -29,10 +29,16 @@ def post_location_info(data: typing.Dict[str, typing.Any]) -> (str, bool):
 
 def get_latest_location_info(device_id: str) -> typing.Dict[typing.Any, typing.Any]:
     # can be used to handle querying
-    query_filter = {}
+    query_filter: typing.Dict[str, str] = {}
     if device_id:
         query_filter["device"] = device_id
     cur: pymongo.cursor.Cursor = MONGO_DATA_CURSOR.find(filter=query_filter).sort("_id", -1).limit(1)
-    record = list(cur)[0]
-    record["_id"] = str(record.get("_id", ""))
-    return dict(record)
+    data = list(cur)
+    if any(data):
+        record: typing.Dict = data[0]
+        if not record:
+            return {}
+        record["_id"] = str(record.get("_id", ""))
+        return dict(record)
+    else:
+        return {}

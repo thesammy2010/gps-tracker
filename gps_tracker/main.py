@@ -21,9 +21,9 @@ def location():
 
 def serve() -> None:
     if CONFIG.flask_env == "PRODUCTION":
-        waitress.serve(APP, host="0.0.0.0", port=CONFIG.port)
+        waitress.serve(APP, host="0.0.0.0", port=int(CONFIG.port))
     else:
-        APP.run(debug=True, host="0.0.0.0", port=CONFIG.port)
+        APP.run(debug=True, host="0.0.0.0", port=int(CONFIG.port))
 
 
 if __name__ == "__main__":
