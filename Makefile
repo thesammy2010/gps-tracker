@@ -13,7 +13,7 @@ test-unit:  ## only run unit tests
 test-integration: start-mongo  ## run integration tests
 		pytest -m integration
 
-test:  ## run all python tests
+test: start-mongo ## run all python tests
 		coverage run -m pytest -m all
 		coverage report
 

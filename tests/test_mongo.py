@@ -81,7 +81,6 @@ class TestMongo:
                     "altitude": "7",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0),
                 },
             ),
             ("unknown device", {}),
@@ -98,7 +97,6 @@ class TestMongo:
                     "altitude": "7",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0),
                 },
             ),
             (
@@ -114,7 +112,6 @@ class TestMongo:
                     "altitude": "50",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 4, 0, 0, 0),
                 },
             ),
         ],
@@ -123,4 +120,6 @@ class TestMongo:
         data = get_latest_location_info(device_id=device_id)
         if data.get("_id", None):
             del data["_id"]
+        if data.get("collectedAt", None):
+            del data["collectedAt"]
         assert expected_value == data

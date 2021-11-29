@@ -17,5 +17,5 @@ class TestHealth(TestCase):
     @pytest.mark.integration
     def test_health2(self) -> None:
         response = self.client.get("/health?db=true")
-        self.assertEqual(response.get_data(), b'{"db":true}\n')
+        self.assertEqual(response.get_json(), {"db": True})
         self.assertEqual(response.status_code, 200)
