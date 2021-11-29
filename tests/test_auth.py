@@ -2,6 +2,7 @@ import typing
 from typing import Tuple
 from unittest import mock
 
+import pymongo.errors
 import pytest
 
 from gps_tracker.auth import decrypt_header, hash_password, is_user_authenticated  # isort: skip
@@ -21,6 +22,12 @@ class TestAuth(object):
             "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
             "authorised": False,
         },
+        "user3": {
+            "username": "username",
+            "salt": "salt".encode("utf-8").hex(),
+            "key": "2210d7f11fdaceae6882c765b5228c96cd854655d3782746c2617128a4e62ad8",
+            "authorised": "non boolean field",
+        },
     }
 
     @pytest.mark.parametrize(
@@ -32,6 +39,7 @@ class TestAuth(object):
             ("dXNlcm5hbWU6", ("username", "")),  # username:
             ("", (None, None)),
             ("Ojo=", (None, None)),  # "::"
+            ("not/Base64", (None, None)),
         ],
     )
     def test_decrypt_header(self, expected_value: Tuple[str, str], input_value: str) -> None:
@@ -87,6 +95,13 @@ class TestAuth(object):
                 False,
                 403,  # identity known but not authorised
             ),
+            (
+                {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                "user3",
+                "Internal Error while verifying credentials",
+                False,
+                500,  # error on password hashing
+            ),
         ],
     )
     @mock.patch("gps_tracker.auth.look_up_user")
@@ -137,3 +152,12 @@ class TestAuth(object):
         assert expected_message == message
         assert expected_access is access
         assert expected_code == code
+
+    @mock.patch("gps_tracker.auth.look_up_user")
+    def test_is_user_authenticated_error(self, mocked_lookup: mock.MagicMock) -> None:
+        mocked_lookup.side_effect = pymongo.errors.PyMongoError("mocked error")
+
+        res1, res2, res3 = is_user_authenticated({"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="})
+        assert res1 == "Internal Error while fetching credentials mocked error"
+        assert not res2
+        assert res3 == 500

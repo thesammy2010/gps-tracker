@@ -33,16 +33,20 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
     if "appid" not in params:
         return "appid must be sent as a parameter in the request", False, {}
 
+    if not data:
+        return "payload must not be empty", False, {}
+
     for field in numeric_fields:
-        try:
-            float(data.get(field))
-        except (ValueError, TypeError):
-            return (
-                f"field <{field}> of value <{data.get('value')}> of type <{type(data.get('value')).__name__}>"
-                " must be numeric",
-                False,
-                {},
-            )
+        if field in data:
+            try:
+                float(data.get(field))
+            except (ValueError, TypeError):
+                return (
+                    f"field <{field}> of value <{data.get('value')}> of type <{type(data.get('value')).__name__}>"
+                    " must be numeric",
+                    False,
+                    {},
+                )
 
     return "", True, {i: (float(j) if i in numeric_fields else j) for i, j in data.items() if i in allowed_fields}
 
@@ -89,6 +93,8 @@ def request() -> flask.Response:
                     return flask.make_response({"error": "Unknown internal error"}, 500)
         case _:
             return flask.make_response(
-                f'{"error": "HTTP Verb %s is not supported, please use one of [GET, POST, PUT]}' % flask.request.method,
-                403,
+                '{"error": "HTTP Verb '
+                + flask.request.method
+                + ' is not supported, please use one of GET, POST, PUT"}',
+                405,
             )

@@ -46,6 +46,7 @@ class TestGenerateContent:
             ({"direction": 45.678}, [{"name": "🧭 Direction", "value": "45.7 °"}]),
             ({"provider": "network"}, [{"name": "🛰️ GPS source", "value": "network"}]),
             ({"speed": 23.45678}, [{"name": "🏃 Speed", "value": "23.46 m/s"}]),
+            ({"foo": "bar"}, []),
         ],
     )
     def test_generate_content(self, input_data: typing.Dict, expected_result: typing.List[typing.Dict]) -> None:
