@@ -1,8 +1,8 @@
+from unittest import TestCase
+
 import pytest
 
 from gps_tracker.main import APP
-
-from unittest import TestCase
 
 
 class TestHealth(TestCase):

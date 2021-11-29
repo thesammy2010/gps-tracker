@@ -4,8 +4,13 @@ from unittest import mock
 
 import pytest
 
-from gps_tracker.mongo import MONGO_DATA_CURSOR, look_up_user, post_location_info, ping, \
-    get_latest_location_info  # isort: skip
+from gps_tracker.mongo import (  # isort: skip
+    get_latest_location_info,
+    look_up_user,
+    ping,
+    post_location_info,
+    MONGO_DATA_CURSOR,
+)
 
 
 class TestMongo:
@@ -76,12 +81,10 @@ class TestMongo:
                     "altitude": "7",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0)
+                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0),
                 },
             ),
-            (
-                "unknown device", {}
-            ),
+            ("unknown device", {}),
             (
                 "Android",
                 {
@@ -95,7 +98,7 @@ class TestMongo:
                     "altitude": "7",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0)
+                    "collectedAt": datetime.datetime(2021, 11, 5, 0, 0, 0),
                 },
             ),
             (
@@ -111,10 +114,10 @@ class TestMongo:
                     "altitude": "50",
                     "provider": "data",
                     "activity": "n/a",
-                    "collectedAt": datetime.datetime(2021, 11, 4, 0, 0, 0)
-                }
-            )
-        ]
+                    "collectedAt": datetime.datetime(2021, 11, 4, 0, 0, 0),
+                },
+            ),
+        ],
     )
     def test_get_latest_location_info(self, device_id: str, expected_value: typing.Dict) -> None:
         data = get_latest_location_info(device_id=device_id)

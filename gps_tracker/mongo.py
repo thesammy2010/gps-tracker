@@ -44,5 +44,5 @@ def get_latest_location_info(device_id: str) -> typing.Dict[typing.Any, typing.A
 def ping() -> bool:
     return [
         MONGO_CLIENT[CONFIG.mongo_auth_database].command("ping"),
-        MONGO_CLIENT[CONFIG.mongo_data_database].command("ping")
+        MONGO_CLIENT[CONFIG.mongo_data_database].command("ping"),
     ].count({"ok": 1.0}) == 2
