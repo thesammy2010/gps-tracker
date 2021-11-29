@@ -20,7 +20,7 @@ valid_data: typing.Dict[str, str | datetime.datetime] = {
     "altitude": "7",
     "provider": "data",
     "activity": "n/a",
-    "collectedAt": "Fri, 05 Nov 2021 00:00:00 GMT"
+    "collectedAt": "Fri, 05 Nov 2021 00:00:00 GMT",
 }
 
 
@@ -28,33 +28,13 @@ class TestValidateRequest:
     @pytest.mark.parametrize(
         "params,data,expected1,expected2,expected3",
         [
+            pytest.param({}, {}, "appid must be sent as a parameter in the request", False, {}),
+            pytest.param({"app": "example"}, {}, "appid must be sent as a parameter in the request", False, {}),
+            pytest.param({"appid": "test-data"}, {"_id": valid_data["_id"]}, "", True, {}),
             pytest.param(
-                {}, {}, "appid must be sent as a parameter in the request", False, {}
+                {"appid": "test-data"}, {"device": valid_data["device"]}, "", True, {"device": valid_data["device"]}
             ),
-            pytest.param(
-                {"app": "example"}, {}, "appid must be sent as a parameter in the request", False, {}
-            ),
-            pytest.param(
-                {"appid": "test-data"},
-                {"_id": valid_data["_id"]},
-                "",
-                True,
-                {}
-            ),
-            pytest.param(
-                {"appid": "test-data"},
-                {"device": valid_data["device"]},
-                "",
-                True,
-                {"device": valid_data["device"]}
-            ),
-            pytest.param(
-                {"appid": "test-data"},
-                {"latitude": valid_data["latitude"]},
-                "",
-                True,
-                {"latitude": 0.0}
-            ),
+            pytest.param({"appid": "test-data"}, {"latitude": valid_data["latitude"]}, "", True, {"latitude": 0.0}),
             pytest.param(
                 {"appid": "test-data"},
                 {"latitude": None},
@@ -62,9 +42,11 @@ class TestValidateRequest:
                 False,
                 {},
             ),
-        ]
+        ],
     )
-    def test_validate_request(self, params: typing.Dict, data: typing.Dict, expected1: typing.Dict, expected2: bool, expected3: typing.Dict) -> None:
+    def test_validate_request(
+        self, params: typing.Dict, data: typing.Dict, expected1: typing.Dict, expected2: bool, expected3: typing.Dict
+    ) -> None:
         res1, res2, res3 = validate_request(params=params, data=data)
         assert expected1 == res1
         assert expected2 == res2
@@ -76,10 +58,7 @@ class TestValidateRequest:
         [
             (
                 pytest.param(
-                    "?device_id=test-don-",
-                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
-                    200,
-                    {}
+                    "?device_id=test-don-", {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="}, 200, {}
                 )
             ),
             (
@@ -88,12 +67,18 @@ class TestValidateRequest:
                     {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
                     200,
                     valid_data,
-                    marks=pytest.mark.skip("need to handle")
+                    marks=pytest.mark.skip("need to handle"),
                 )
             ),
-        ]
+        ],
     )
-    def test_request_get(self, params: str, headers: typing.Dict[str, str], expected_response_code: int, expected_response_data: typing.Dict) -> None:
+    def test_request_get(
+        self,
+        params: str,
+        headers: typing.Dict[str, str],
+        expected_response_code: int,
+        expected_response_data: typing.Dict,
+    ) -> None:
         response = APP.test_client().get("/location" + params, headers=headers)
         assert expected_response_code == response.status_code
         assert "application/json" == response.content_type
@@ -110,7 +95,7 @@ class TestValidateRequest:
                     {},
                     400,
                     {"error": "payload must not be empty"},
-                    True
+                    True,
                 )
             ),
             (
@@ -120,12 +105,20 @@ class TestValidateRequest:
                     {},
                     400,
                     {"error": "appid must be sent as a parameter in the request"},
-                    True
+                    True,
                 )
             ),
-        ]
+        ],
     )
-    def test_request_post(self, params: str, headers: typing.Dict[str, str], input_data: typing.Dict, expected_response_code: int, expected_response_data: typing.Dict, error: bool) -> None:
+    def test_request_post(
+        self,
+        params: str,
+        headers: typing.Dict[str, str],
+        input_data: typing.Dict,
+        expected_response_code: int,
+        expected_response_data: typing.Dict,
+        error: bool,
+    ) -> None:
         response: flask.Response = APP.test_client().post("/location" + params, headers=headers, json=input_data)
         assert expected_response_code == response.status_code
         assert "application/json" == response.content_type

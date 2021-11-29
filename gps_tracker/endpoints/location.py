@@ -93,8 +93,8 @@ def request() -> flask.Response:
                     return flask.make_response({"error": "Unknown internal error"}, 500)
         case _:
             return flask.make_response(
-                '{"error": "HTTP Verb ' +
-                flask.request.method +
-                ' is not supported, please use one of GET, POST, PUT"}',
+                '{"error": "HTTP Verb '
+                + flask.request.method
+                + ' is not supported, please use one of GET, POST, PUT"}',
                 405,
             )
