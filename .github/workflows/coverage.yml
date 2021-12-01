@@ -1,12 +1,13 @@
 name: "Coverage"
 
 on:
-  pull_request:
-    branches: ["*"]
+  push:
+    branches:
+      - "master"
 
 jobs:
   test:
-    name: "test and comment coverage"
+    name: "test and upload coverage"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
@@ -34,16 +35,37 @@ jobs:
         run: |
           coverage run -m pytest -m all
           coverage html
-          coverage report > pytest-coverage.txt
-      - name: "pytest-coverage-commentator"
-        uses: "coroo/pytest-coverage-commentator@v1.0.2"
-        with:
-          pytest-coverage: "pytest-coverage.txt"
+          coverage xml
       - name: "Stop containers"
         if: "always()"
         run: "docker-compose -f 'docker-compose.yml' down"
       - name: "Upload code coverage report"
         uses: "actions/upload-artifact@v2"
         with:
-          name: "code-coverage-report"
+          name: "code-coverage-report-html"
           path: "htmlcov/index.html"
+      - name: "Upload code coverage report"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: "code-coverage-report-xml"
+          path: "coverage.xml"
+  coverage:
+    needs: "test"
+    name: "download coverage update coverage badge"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/download-artifact@v2"
+        with:
+          name: "code-coverage-report-xml"
+      - name: "update badge"
+        uses: "coverallsapp/github-action@master"
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+  tag:
+    needs: "coverage"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: butlerlogic/action-autotag@1.0.0
+        with:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          tag_prefix: "v"

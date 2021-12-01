@@ -8,3 +8,4 @@
 - add homepage to be displayed on GitHub
 - add some deployment
 - fix CI code coverage note
+- add caching and request limiting with Redis
