@@ -1,7 +1,11 @@
+name: "deploy"
+
+#on:
+#  push:
+#    tags:
+#      - "v*.*.*"
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  - "push"
 
 jobs:
   deploy:
@@ -9,29 +13,47 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: "actions/checkout@v2"
-      - name: "Set variables"
-        run: |
-          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-          export CR_PAT=${{ secrets.GITHUB_TOKEN }}
-          export DATE_TAG=$(date "+%Y-%m-%dT%H:%M%:%S")
-      - name: "Log into GitHub Container Registry"
-        uses: "echo $CR_PAT | docker login ghcr.io -u thesammy2010 --password-stdin"
+      - name: "Login to GitHub Container Registry"
+        uses: "docker/login-action@v1"
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+      - name: "Login to Google Container Registry"
+        uses: "docker/login-action@v1"
+        with:
+          registry: "gcr.io"
+          username: "_json_key"
+          password: "${{ secrets.GCP_SA_KEY }}"
       - name: "build and tag"
-        uses: |
-          docker build . \
-            -t ghcr.io/thesammy2010/gps-tracker:$RELEASE_VERSION \
-            -t ghcr.io/thesammy2010/gps-tracker:$DATE_TAG \
-            -t ghcr.io/thesammy2010/gps-tracker:latest
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker build \
+            -t "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
+            -t "ghcr.io/$REGISTRY/gps-tracker:latest" \
+            -t "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
+            -t "gcr.io/$REGISTRY/gps-tracker:latest" \
+            .
+        env:
+          REGISTRY: "${{ github.actor }}"
       - name: "push"
-        uses: |
-          docker push ghcr.io/thesammy2010/gps-tracker:$RELEASE_VERSION
-          docker push ghcr.io/thesammy2010/gps-tracker:$DATE_TAG
-          docker push ghcr.io/thesammy2010/gps-tracker:latest
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker push "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker push "ghcr.io/$REGISTRY/gps-tracker:latest"
+          docker push "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker push "gcr.io/$REGISTRY/gps-tracker:latest"
+        env:
+          REGISTRY: "${{ github.actor }}"
       - name: "remove images"
-        uses: |
-          docker rmi ghcr.io/thesammy2010/gps-tracker:$RELEASE_VERSION
-          docker rmi ghcr.io/thesammy2010/gps-tracker:$DATE_TAG
-          docker rmi ghcr.io/thesammy2010/gps-tracker:latest
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker rmi "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker rmi "ghcr.io/$REGISTRY/gps-tracker:latest"
+          docker rmi "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker rmi "gcr.io/$REGISTRY/gps-tracker:latest"
+        env:
+          REGISTRY: "${{ github.actor }}"
       - name: "Setup Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v0.2.0"
         with:
@@ -39,8 +61,11 @@ jobs:
           service_account_key: "${{ secrets.GCP_SA_KEY }}"
       - name: Deploy to Cloud Run
         run: |-
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
           gcloud run deploy gps-tracker \
             --region europe-west1 \
-            --image ghcr.io/thesammy2010/gps-tracker:$RELEASE_VERSION \
+            --image "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
             --platform managed \
             --allow-unauthenticated
+        env:
+          REGISTRY: "${{ github.actor }}"
