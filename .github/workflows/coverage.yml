@@ -1,4 +1,4 @@
-name: "Coverage"
+name: "Report & Tag"
 
 on:
   push:

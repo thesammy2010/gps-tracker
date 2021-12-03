@@ -1,0 +1,68 @@
+name: "Google Cloud Run"
+
+on:
+  create:
+
+jobs:
+  deploy:
+    runs-on: "ubuntu-latest"
+    if: "${{ startsWith(github.ref, 'refs/tags/v') }}"
+    steps:
+      - name: "Checkout code"
+        uses: "actions/checkout@v2"
+      - name: "Login to GitHub Container Registry"
+        uses: "docker/login-action@v1"
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+      - name: "Login to Google Container Registry"
+        uses: "docker/login-action@v1"
+        with:
+          registry: "gcr.io"
+          username: "_json_key"
+          password: "${{ secrets.GCP_SA_KEY }}"
+      - name: "build and tag"
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker build \
+            -t "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
+            -t "ghcr.io/$REGISTRY/gps-tracker:latest" \
+            -t "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
+            -t "gcr.io/$REGISTRY/gps-tracker:latest" \
+            .
+        env:
+          REGISTRY: "${{ github.actor }}"
+      - name: "push"
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker push "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker push "ghcr.io/$REGISTRY/gps-tracker:latest"
+          docker push "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker push "gcr.io/$REGISTRY/gps-tracker:latest"
+        env:
+          REGISTRY: "${{ github.actor }}"
+      - name: "remove images"
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          docker rmi "ghcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker rmi "ghcr.io/$REGISTRY/gps-tracker:latest"
+          docker rmi "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION"
+          docker rmi "gcr.io/$REGISTRY/gps-tracker:latest"
+        env:
+          REGISTRY: "${{ github.actor }}"
+      - name: "Setup Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v0.2.0"
+        with:
+          project_id: "${{ secrets.GCP_PROJECT_ID }}"
+          service_account_key: "${{ secrets.GCP_SA_KEY }}"
+      - name: Deploy to Cloud Run
+        run: |-
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          gcloud run deploy gps-tracker \
+            --region europe-west1 \
+            --image "gcr.io/$REGISTRY/gps-tracker:$RELEASE_VERSION" \
+            --platform managed \
+            --allow-unauthenticated
+        env:
+          REGISTRY: "${{ github.actor }}"

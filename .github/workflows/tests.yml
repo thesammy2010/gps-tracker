@@ -1,11 +1,13 @@
 name: "Test"
 
 on:
-  - "push"
+  push:
+    branches:
+      - "!master"
 
 jobs:
   unit:
-    name: "test (unit)"
+    name: "unit"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
@@ -25,7 +27,7 @@ jobs:
       - name: "test"
         run: "pytest --verbose"
   integration:
-    name: "test (integration)"
+    name: "integration"
     timeout-minutes: 10
     runs-on: "ubuntu-latest"
     strategy:

@@ -1,11 +1,14 @@
 name: "Lint"
 
 on:
-  - "push"
+  push:
+    branches:
+      - "!master"
+      - "*"
 
 jobs:
   black:
-    name: "lint (black)"
+    name: "black"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
@@ -24,7 +27,7 @@ jobs:
       - name: "Lint"
         run: "black . --check"
   isort:
-    name: "lint (imports)"
+    name: "imports"
     runs-on: "ubuntu-latest"
     strategy:
       matrix:
