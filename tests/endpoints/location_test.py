@@ -8,33 +8,44 @@ import pytest
 from gps_tracker.endpoints.location import validate_request
 from gps_tracker.main import APP
 
-valid_data: typing.Dict[str, str | datetime.datetime] = {
-    "_id": "615b4e4b1ad5da6788c3ea6e",
-    "latitude": "0",
-    "longitude": "1",
-    "device": "Android",
-    "accuracy": "3",
-    "battery": "4",
-    "speed": "5",
-    "direction": "6",
-    "altitude": "7",
-    "provider": "data",
-    "activity": "n/a",
-    "collectedAt": "Fri, 05 Nov 2021 00:00:00 GMT",
-}
-
 
 class TestValidateRequest:
+    valid_data: typing.Dict[str, str | datetime.datetime] = {
+        "_id": "615b4e4b1ad5da6788c3ea6e",
+        "id": "50e09373d0e1146ed58d05d70550bb279d9b9d9a760215c4278440204ddb6909",
+        "latitude": "0",
+        "longitude": "1",
+        "device": "Android",
+        "accuracy": "3",
+        "battery": "4",
+        "speed": "5",
+        "direction": "6",
+        "altitude": "7",
+        "provider": "data",
+        "activity": "n/a",
+        "collectedAt": "Fri, 05 Nov 2021 00:00:00 GMT",
+    }
+
     @pytest.mark.parametrize(
         "params,data,expected1,expected2,expected3",
         [
             pytest.param({}, {}, "appid must be sent as a parameter in the request", False, {}),
             pytest.param({"app": "example"}, {}, "appid must be sent as a parameter in the request", False, {}),
-            pytest.param({"appid": "test-data"}, {"_id": valid_data["_id"]}, "", True, {}),
+            pytest.param({"appid": "test-data"}, {"_id": valid_data["_id"]}, "field <_id> is not supported", False, {}),
             pytest.param(
-                {"appid": "test-data"}, {"device": valid_data["device"]}, "", True, {"device": valid_data["device"]}
+                {"appid": "test-data"},
+                {"device": valid_data["device"]},
+                "",
+                True,
+                {"device": valid_data["device"], "appid": "test-data"},
             ),
-            pytest.param({"appid": "test-data"}, {"latitude": valid_data["latitude"]}, "", True, {"latitude": 0.0}),
+            pytest.param(
+                {"appid": "test-data"},
+                {"latitude": valid_data["latitude"]},
+                "",
+                True,
+                {"latitude": 0.0, "appid": "test-data"},
+            ),
             pytest.param(
                 {"appid": "test-data"},
                 {"latitude": None},
@@ -58,16 +69,18 @@ class TestValidateRequest:
         [
             (
                 pytest.param(
-                    "?device_id=test-don-", {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="}, 200, {}
+                    "?device=test-don-",
+                    {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
+                    400,
+                    {"error": 'No record matches your filter: {"device": "test-don-"}'},
                 )
             ),
             (
                 pytest.param(
-                    "",
+                    "?device=Android",
                     {"Authorization": "Basic dXNlcm5hbWU6YSBkaWZmZXJlbnQgcGFzc3dvcmQ="},
                     200,
                     valid_data,
-                    marks=pytest.mark.skip("need to handle"),
                 )
             ),
         ],
@@ -79,9 +92,11 @@ class TestValidateRequest:
         expected_response_code: int,
         expected_response_data: typing.Dict,
     ) -> None:
-        response = APP.test_client().get("/location" + params, headers=headers)
+        response = APP.test_client().get("/api/v1/location" + params, headers=headers)
         assert expected_response_code == response.status_code
         assert "application/json" == response.content_type
+        print(response.json)
+        print(expected_response_data)
         assert expected_response_data == response.json
 
     @pytest.mark.integration
@@ -119,7 +134,7 @@ class TestValidateRequest:
         expected_response_data: typing.Dict,
         error: bool,
     ) -> None:
-        response: flask.Response = APP.test_client().post("/location" + params, headers=headers, json=input_data)
+        response: flask.Response = APP.test_client().post("/api/v1/location" + params, headers=headers, json=input_data)
         assert expected_response_code == response.status_code
         assert "application/json" == response.content_type
         if error:
@@ -132,7 +147,7 @@ class TestValidateRequest:
     @mock.patch("gps_tracker.endpoints.location.is_user_authenticated")
     def test_request_methods(self, patched_method: mock.MagicMock, method: str) -> None:
         patched_method.return_value = "", True, 200
-        response: flask.Response = APP.test_client().__getattribute__(method.lower())("/location", method=method)
+        response: flask.Response = APP.test_client().__getattribute__(method.lower())("/api/v1/location", method=method)
         expected_result: str = '{"error": "HTTP Verb %s is not supported, please use one of GET, POST, PUT"}' % method
         assert expected_result.encode() == response.get_data()
         assert 405 == response.status_code

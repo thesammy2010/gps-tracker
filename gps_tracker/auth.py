@@ -1,6 +1,7 @@
 import base64
 import binascii
 import hashlib
+import logging
 import typing
 
 import pymongo.errors
@@ -53,8 +54,9 @@ def is_user_authenticated(headers: typing.Dict[str, str]) -> (str, bool, int):
         if not data.get("username", "") == username:
             return "Not Authorised", False, 401
     except pymongo.errors.PyMongoError as e:
-        print(e)
-        return "Internal Error while fetching credentials " + str(e), False, 500
+        msg: str = "Internal Error while fetching credentials " + str(e)
+        logging.error(msg)
+        return msg, False, 500
 
     calc_key, stored_key = hash_password(password, salt=data.get("salt", "")), data.get("key", "")
 
