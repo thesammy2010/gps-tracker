@@ -12,7 +12,7 @@ class TestSettings:
         assert config.port == "5000"
         assert config.flask_env == "DEBUG"
         assert config.discord_webhook == "https://discordapp.com/api/webhooks/"
-        assert config.mongo_url == "mongodb://user:passw@localhost:27017/api"
+        # assert config.mongo_url == "mongodb://user:passw@localhost:27017/api"  # set locally on my machine
         assert config.mongo_auth_database == "api"
         assert config.mongo_auth_collection == "auths"
         assert config.mongo_data_database == "api"

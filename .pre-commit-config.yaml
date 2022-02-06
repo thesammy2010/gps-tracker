@@ -1,0 +1,37 @@
+default_language_version:
+  python: "python3.10"
+
+repos:
+- repo: "https://github.com/pre-commit/pre-commit-hooks"
+  rev: "v4.1.0"
+  hooks:
+  - id: "trailing-whitespace"
+  - id: "end-of-file-fixer"
+  - id: "check-yaml"
+  - id: "check-added-large-files"
+  - id: "check-json"
+  - id: "check-merge-conflict"
+  - id: "check-toml"
+  - id: "debug-statements"
+  - id: "name-tests-test"
+
+-   repo: "local"
+    hooks:
+    - id: "isort"
+      name: "Sort imports"
+      language: "system"
+      entry: "isort "
+      types:
+        - "python"
+      stages:
+        - "commit"
+      pass_filenames: true
+    - id: black
+      name: "Code formatting"
+      language: "system"
+      entry: "black -l 120 "
+      types:
+        - "python"
+      stages:
+        - "commit"
+      pass_filenames: true
