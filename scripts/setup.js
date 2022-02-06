@@ -41,6 +41,7 @@ db.auths.insert(
 db.data.insert(
     {
         _id: new ObjectId("615b4e4b1ad5da6788c3ea6d"),
+        id: "a35c8af83fe31e00e941be6f1193b3d5afb6639f6d7afc3e5f2070434484534a",
         latitude: "45",
         longitude: "30",
         device: "iPhone",
@@ -57,6 +58,7 @@ db.data.insert(
 db.data.insert(
     {
         _id: new ObjectId("615b4e4b1ad5da6788c3ea6e"),
+        id: "50e09373d0e1146ed58d05d70550bb279d9b9d9a760215c4278440204ddb6909",
         latitude: "0",
         longitude: "1",
         device: "Android",
@@ -70,4 +72,3 @@ db.data.insert(
         collectedAt: new Date(2021, 10, 5, 0, 0, 0)
     }
 )
-

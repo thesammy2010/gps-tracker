@@ -1,7 +1,9 @@
 name: "Google Cloud Run"
 
 on:
-  repository_dispatch:
+  push:
+    tags:
+
 
 jobs:
   deploy:

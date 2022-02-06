@@ -2,21 +2,28 @@ import flask
 import flask_restful
 import waitress
 
+from gps_tracker import version
 from gps_tracker.endpoints.health import Health
 from gps_tracker.endpoints.location import request
 from gps_tracker.settings import CONFIG
 
 APP = flask.Flask(__name__)
 API = flask_restful.Api(APP)
+API_PATH: str = f"/api/v{version}"
 
-API.add_resource(Health, "/health")
+API.add_resource(Health, f"{API_PATH}/health")
 
 
-@APP.route("/location", methods=["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"])
+@APP.route(f"{API_PATH}/location", methods=["GET", "PUT", "PATCH", "POST", "DELETE"])
 def location():
     resp = request()
-    # print(resp.data)  # for any debugging
     return resp
+
+
+@APP.route("/<path:path>")
+def default_resolve(path: str = ""):
+    # eventually will build a 302 to /home once implemented
+    return flask.make_response({"error": "This path does not exist"}, 404)
 
 
 def serve() -> None:

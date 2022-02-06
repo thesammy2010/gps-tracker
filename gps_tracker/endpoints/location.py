@@ -19,6 +19,8 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
         "altitude",
         "provider",
         "activity",
+        "appid",
+        "version",
     ]
     numeric_fields: typing.List[str] = [
         "latitude",
@@ -29,6 +31,10 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
         "direction",
         "altitude",
     ]
+
+    for field in data.keys():
+        if field not in allowed_fields:
+            return f"field <{field}> is not supported", False, {}
 
     if "appid" not in params:
         return "appid must be sent as a parameter in the request", False, {}
@@ -48,6 +54,8 @@ def validate_request(params: typing.Dict, data: typing.Dict) -> (str, bool, typi
                     {},
                 )
 
+    data["appid"] = params["appid"]
+
     return "", True, {i: (float(j) if i in numeric_fields else j) for i, j in data.items() if i in allowed_fields}
 
 
@@ -59,8 +67,15 @@ def request() -> flask.Response:
 
     match flask.request.method:
         case "GET":
-            data = get_latest_location_info(device_id=flask.request.args.get("device_id", ""))
-            return flask.make_response(flask.jsonify(dict(data)), 200)
+            data, success, err = get_latest_location_info(query_params=flask.request.args)
+            match (success, err):
+                case (True, ""):
+                    return flask.make_response(flask.jsonify(dict(data)), 200)
+                case (False, "Internal Server Error: Code 50002"):
+                    return flask.make_response({"error": err}, 500)
+                case (False, _):
+                    return flask.make_response({"error": err}, 400)
+
         case "POST" | "PUT":
             error, is_valid, data = validate_request(
                 params=flask.request.args, data=flask.request.json or flask.request.form
@@ -68,12 +83,12 @@ def request() -> flask.Response:
             if not is_valid:
                 return flask.make_response({"error": error}, 400)
 
-            req_id, mongo_post_success = post_location_info(data)
+            req_id, mongo_post_success, err = post_location_info(data)
             if not flask.request.args.get("discord") is True:
                 if mongo_post_success:
                     return flask.make_response({"request_id": req_id}, 200)
                 else:
-                    return flask.make_response({"error": "failed to record result"}, 500)
+                    return flask.make_response({"error": err}, 500)
 
             data["_id"] = req_id
             discord_post_success = post_to_discord(location_data=data)
