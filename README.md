@@ -42,8 +42,8 @@ Content-Type: application/json
     "battery": 22.0,
     "device": "a355b5cfccdabe30",
     "direction": 0.0,
-    "latitude": 51.5885036,
-    "longitude": -0.3391195,
+    "latitude": 45.1234,
+    "longitude": 45.1234,
     "provider": "network",
     "speed": 0.0
 }
@@ -66,8 +66,8 @@ Connection: close
     "battery": 22.0,
     "device": "a355b5cfccdabe30",
     "direction": 0.0,
-    "latitude": 51.5885036,
-    "longitude": -0.3391195,
+    "latitude": 45.1234,
+    "longitude": 45.1234,
     "provider": "network",
     "speed": 0.0
 }
